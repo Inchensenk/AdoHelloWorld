@@ -21,6 +21,8 @@ namespace AdoHelloWorld
 
         public ObservableCollection<Person> People { get; set; } = new ObservableCollection<Person>();
 
+        public Person NewPerson { get; set; } = new Person();
+
         public DelegateCommand OnClickCommand { get; }
 
         public MainWindowViewModel()
@@ -28,20 +30,23 @@ namespace AdoHelloWorld
             OnClickCommand = new DelegateCommand(OnClickAsync);
         }
 
+       
         private async void OnClickAsync()
         {
             MessageBox.Show("Click");
 
-            string connectionString = "Server=PIXEL; Database=AdoExplanationDb; Trusted_Connection=True; Encrypt=false";
+            //string connectionString = "Server=PIXEL; Database=AdoExplanationDb; Trusted_Connection=True; Encrypt=false";
+            string connectionString = "Server=S-DEV-01; Database=AdoExplanationDb; Trusted_Connection=True; Encrypt=false";
+            //string connectionString= "Data Source=S-DEV-01;Initial Catalog=AdoDB;Integrated Security=True;Pooling=False";
 
-           using (SqlConnection connection = new SqlConnection(connectionString))
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 //ожидает в текущем потоке пока выполнится другой поток
                 await connection.OpenAsync();
 
-                //MessageBox.Show($"Connected: {connection.ClientConnectionId/*id сеанса*/}");
+                MessageBox.Show($"Connected: {connection.ClientConnectionId/*id сеанса*/}");
 
-                //SqlCommand command = new SqlCommand("SELECT * FROM Persons", connection);
+                //SqlCommand command = new SqlCommand($"SELECT * FROM Persons", connection);
 
 
 
@@ -68,13 +73,18 @@ namespace AdoHelloWorld
 
                 //SqlCommand command = new SqlCommand("UPDATE Persons SET Age = 40 WHERE Name ='Елена'", connection);
 
-                SqlCommand command = new SqlCommand("DELETE FROM Persons WHERE Age >= 30", connection);
+                //SqlCommand command = new SqlCommand("DELETE FROM Persons WHERE Age >= 30", connection);
+
+                SqlCommand command = new SqlCommand($"INSERT INTO Persons (Name, Age, Height) VALUES ('{NewPerson.Name}', {NewPerson.Age}, 190.1)", connection);
+
 
                 try
                 {
+
+                    /*ExecuteNonQueryAsync() - подходит для операций INSERT, UPDATE, DELETE, CREATE*/
                     //ExecuteNonQueryAsync() возвращает колличество измененных строк
-                    var succes = await command.ExecuteNonQueryAsync(); 
-                    
+                    var succes = await command.ExecuteNonQueryAsync();
+
                     if (succes > 0)
                     {
                         MessageBox.Show($"Succes: {succes}");
@@ -84,11 +94,20 @@ namespace AdoHelloWorld
                         MessageBox.Show("Fail");
                     }
                 }
-                
+
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
                 }
+
+                /*ExecuteScalar()/ExecuteScalarAsync(): выполняет sql-выражение и возвращает одно скалярное значение, например, число. 
+                 * Подходит для sql-выражения SELECT в паре с одной из встроенных функций SQL, как например, Min, Max, Sum, Count.*/
+                //Команда выводит скалярное значение
+                //SqlCommand command = new SqlCommand("SELECT MAX(Age) FROM Persons ",connection);
+
+                //var res = await command.ExecuteScalarAsync();
+
+                //MessageBox.Show($"Succes: {res}");
 
             }
            
