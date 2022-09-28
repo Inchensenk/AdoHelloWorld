@@ -13,7 +13,9 @@ using System.Windows;
 namespace AdoHelloWorld
 {
     
-    // INotifyPropertyChanged связывает между собой вьюху, модель и вьюмодель
+    /// <summary>
+    /// INotifyPropertyChanged связывает между собой вьюху, модель и вьюмодель
+    /// </summary>
     
     public class MainWindowViewModel : INotifyPropertyChanged
     {
@@ -75,8 +77,21 @@ namespace AdoHelloWorld
 
                 //SqlCommand command = new SqlCommand("DELETE FROM Persons WHERE Age >= 30", connection);
 
-                SqlCommand command = new SqlCommand($"INSERT INTO Persons (Name, Age, Height) VALUES ('{NewPerson.Name}', {NewPerson.Age}, 190.1)", connection);
+                //SqlCommand command = new SqlCommand($"INSERT INTO Persons (Name, Age, Height) VALUES ('{NewPerson.Name}', {NewPerson.Age}, 190.1)", connection);
 
+                // Иньекция: x', 20, 20.0); DELETE FROM Persons --
+
+                SqlCommand command = new SqlCommand($"INSERT INTO Persons (Name, Age, Height) VALUES (@name, @age, 190.1)", connection);
+
+                //Создание параметра для имени
+                SqlParameter nameParam = new SqlParameter("@name", NewPerson.Name);
+                //Добавление параметра к команде
+                command.Parameters.Add(nameParam);
+
+                //Создание параметра для возраста
+                SqlParameter ageParam = new SqlParameter("@age", NewPerson.Age);
+                //Добавление параметра к команде
+                command.Parameters.Add(ageParam);
 
                 try
                 {

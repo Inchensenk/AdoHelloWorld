@@ -25,10 +25,10 @@
 
         <TextBlock Text="Age: " Grid.Row="1" Grid.Column="2" HorizontalAlignment="Center"/>
         <TextBox Text="{Binding NewPerson.Age, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Grid.Column="3"/>
-            <ListView ItemsSource="{Binding People}" Grid.Row="2">
+            <ListView ItemsSource="{Binding People}" Grid.Row="3">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="100">Имя</GridViewColumn>
+                    <GridViewColumn DisplayMemberBinding="{Binding Path=Name}" Width="50">Имя</GridViewColumn>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Age}" Width="100">Возраст</GridViewColumn>
                     <GridViewColumn DisplayMemberBinding="{Binding Path=Height}" Width="100">Рост</GridViewColumn>
                 </GridView>
