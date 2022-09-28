@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 
 namespace AdoHelloWorld
 {
@@ -19,6 +20,8 @@ namespace AdoHelloWorld
     
     public class MainWindowViewModel : INotifyPropertyChanged
     {
+        
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<Person> People { get; set; } = new ObservableCollection<Person>();
@@ -81,8 +84,40 @@ namespace AdoHelloWorld
 
                 // Иньекция: x', 20, 20.0); DELETE FROM Persons --
 
-                SqlCommand command = new SqlCommand($"INSERT INTO Persons (Name, Age, Height) VALUES (@name, @age, 190.1)", connection);
+                /* SqlCommand command = new SqlCommand($"INSERT INTO Persons (Name, Age, Height) VALUES (@name, @age, 190.1)", connection);
 
+                 //Создание параметра для имени
+                 SqlParameter nameParam = new SqlParameter("@name", NewPerson.Name);
+                 //Добавление параметра к команде
+                 command.Parameters.Add(nameParam);
+
+                 //Создание параметра для возраста
+                 SqlParameter ageParam = new SqlParameter("@age", NewPerson.Age);
+                 //Добавление параметра к команде
+                 command.Parameters.Add(ageParam);*/
+
+                /*string createProcdedureStr = "" +
+                    "USE AdoExplanationDb\r\nGO\r\n" +
+                    "CREATE PROCEDURE AddPerson\r\n" +
+                    "@name nvarchar(50),\r\n" +
+                    "@age int\r\n" +
+                    "AS\r\n    " +
+                    "INSERT INTO Users (Name, Age)\r\n    " +
+                    "VALUES (@name, @age)\r\n\r\n    " +
+                    "SELECT SCOPE_IDENTITY()\r\n" +
+                    "GO;";
+
+                SqlCommand command = new(createProcdedureStr, connection);*/
+
+
+                SqlTransaction transaction = connection.BeginTransaction();
+
+                SqlCommand command = new("AddPerson", connection);
+                command.Transaction = transaction;
+
+                /*Команда призванная выполнить хранимую процедуру отличается от обычной команды
+                тем что мы указанием тип команды как StoredProcedure и передаем параметры этой процедуры*/
+                command.CommandType = System.Data.CommandType.StoredProcedure;
                 //Создание параметра для имени
                 SqlParameter nameParam = new SqlParameter("@name", NewPerson.Name);
                 //Добавление параметра к команде
@@ -93,6 +128,8 @@ namespace AdoHelloWorld
                 //Добавление параметра к команде
                 command.Parameters.Add(ageParam);
 
+
+
                 try
                 {
 
@@ -100,6 +137,7 @@ namespace AdoHelloWorld
                     //ExecuteNonQueryAsync() возвращает колличество измененных строк
                     var succes = await command.ExecuteNonQueryAsync();
 
+                    //throw new Exception("Бдыщь");
                     if (succes > 0)
                     {
                         MessageBox.Show($"Succes: {succes}");
@@ -108,12 +146,18 @@ namespace AdoHelloWorld
                     {
                         MessageBox.Show("Fail");
                     }
+                    await transaction.CommitAsync();
                 }
 
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
+
+                    await transaction.RollbackAsync();
+
                 }
+
+                
 
                 /*ExecuteScalar()/ExecuteScalarAsync(): выполняет sql-выражение и возвращает одно скалярное значение, например, число. 
                  * Подходит для sql-выражения SELECT в паре с одной из встроенных функций SQL, как например, Min, Max, Sum, Count.*/
